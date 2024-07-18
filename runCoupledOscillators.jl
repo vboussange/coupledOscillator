@@ -17,13 +17,13 @@ using UnPack
 using PyPlot
 using Pkg; Pkg.instantiate()
 
-function plot_PT(model_params, N, sol, main_dir)
-    """
-        plot_PT(model_params, N, sol, main_dir)
-    Plot oscillators in PT space.
+"""
+    plot_PT(model_params, N, sol, main_dir)
+Plot oscillators in PT space.
 
-        Output: Figure
-    """
+Output: Figure
+"""
+function plot_T_center(model_params, N, sol, main_dir)
 
     # Unpack sol values
     @unpack Le2, Gr2_M = model_params
@@ -51,15 +51,15 @@ function plot_PT(model_params, N, sol, main_dir)
 
 end
 
+"""
+    coupled_oscillators(;N, tspan, model_params)
+
+Run the coupled oscillators.
+
+# Output 
+JLD2 file with the obtained solutions.
+"""
 function coupled_oscillators(;N, tspan, model_params)
-    """
-        coupled_oscillators(;N, tspan, model_params)
-
-    Run the coupled oscillators.
-
-    # Output 
-    JLD2 file with the obtained solutions.
-    """
 
     ## Pre-compute derivatives
     dx = 1.0 / (N + 1)
@@ -89,19 +89,21 @@ function coupled_oscillators(;N, tspan, model_params)
     T_i = T_0 # initial value above BC
     Δp_0 = 0.0 # BC
     Δp_i = 0.0 # initial value above BC
-
+    # cacor AB
+    # cao A
+    # co B
     # physical constants
     R = 8.3144621 # J.mol^-1.K^-1
-    M_cao = 0.056 # kg/mol
-    M_caco3 = 0.1 # kg/mol
-    M_co2 = 0.044 # kg/mol
-    ρ_cao = 3.35e3 # kg/m3
-    ρ_caco3 = 2.71e3 # kg/m3
-    ρ_co2 = 1.e3 # kg/m3
+    M_A = 0.056 # kg/mol
+    M_AB = 0.1 # kg/mol
+    M_B = 0.044 # kg/mol
+    ρ_A = 3.35e3 # kg/m3
+    ρ_AB = 2.71e3 # kg/m3
+    ρ_B = 1.e3 # kg/m3
 
     # convenience parameters
-    η1 = (ρ_co2 / ρ_cao) * (M_cao / M_co2)
-    η2 = (ρ_caco3 / ρ_cao) * (M_cao / M_caco3)
+    η1 = (ρ_B / ρ_A) * (M_A / M_B)
+    η2 = (ρ_AB / ρ_A) * (M_A / M_AB)
     ΔAr_c = ΔE / (R * Tc)
 
     # Boundary conditions
@@ -160,10 +162,10 @@ function coupled_oscillators(;N, tspan, model_params)
         Δϕ_chem1 .= (1. - ϕ_0) .* s1 ./ (s1 .+ η1)
         ϕ1 .= ϕ_0 .+ Δϕ_chem1
         ϕ_pad1 .= [ϕ1[1];ϕ1;ϕ1[end]]
-        rhobar_s1 .= (1. .- s1)*ρ_caco3 .+ s1*ρ_cao
-        ρ_m1 .= (1. .- ϕ1).*rhobar_s1 .+ ϕ1*ρ_co2
-        q_z1 .= ((3. .- 2 .* ϕ1)./(ϕ1 .* (1. .- ϕ1))+(rhobar_s1 .- ρ_co2)./ρ_m1).*(D_x * ϕ_pad1) +
-            (ϕ1 .* ρ_co2*(ρ_cao-ρ_caco3)./(rhobar_s1.*ρ_m1)).*(D_x * s_pad1)
+        rhobar_s1 .= (1. .- s1)*ρ_AB .+ s1*ρ_A
+        ρ_m1 .= (1. .- ϕ1).*rhobar_s1 .+ ϕ1*ρ_B
+        q_z1 .= ((3. .- 2 .* ϕ1)./(ϕ1 .* (1. .- ϕ1))+(rhobar_s1 .- ρ_B)./ρ_m1).*(D_x * ϕ_pad1) +
+            (ϕ1 .* ρ_B*(ρ_A-ρ_AB)./(rhobar_s1.*ρ_m1)).*(D_x * s_pad1)
         
         ## time derivatives
         dΔp1 .= Δ_x * bc_Δp * Δp1 / Le1 + q_z1 .* (D_x * bc_Δp * Δp1 / Le1) + μ1 * (1.0 .- ϕ1) .* (1 .- factor_s * s1) .* exp.(Ar * δ * T1 ./ (1.0 .+ δ * T1))
@@ -177,10 +179,10 @@ function coupled_oscillators(;N, tspan, model_params)
         Δϕ_chem2 .= (1. - ϕ_0) .* s2 ./ (s2 .+ η1)
         ϕ2 .= ϕ_0 .+ Δϕ_chem2
         ϕ_pad2 .= [ϕ2[1];ϕ2;ϕ2[end]]
-        rhobar_s2 .= (1. .- s2)*ρ_caco3 .+ s2*ρ_cao
-        ρ_m2 .= (1. .- ϕ2).*rhobar_s2 .+ ϕ2*ρ_co2
-        q_z2 .= ((3. .- 2 .* ϕ2)./(ϕ2 .* (1. .- ϕ2))+(rhobar_s2 .- ρ_co2)./ρ_m1).*(D_x * ϕ_pad2) + 
-                (ϕ2 .* ρ_co2*(ρ_cao-ρ_caco3)./(rhobar_s2.*ρ_m2)).*(D_x * s_pad2)
+        rhobar_s2 .= (1. .- s2)*ρ_AB .+ s2*ρ_A
+        ρ_m2 .= (1. .- ϕ2).*rhobar_s2 .+ ϕ2*ρ_B
+        q_z2 .= ((3. .- 2 .* ϕ2)./(ϕ2 .* (1. .- ϕ2))+(rhobar_s2 .- ρ_B)./ρ_m1).*(D_x * ϕ_pad2) + 
+                (ϕ2 .* ρ_B*(ρ_A-ρ_AB)./(rhobar_s2.*ρ_m2)).*(D_x * s_pad2)
 
         ## calculating time derivatives
         dΔp2 .= Δ_x * bc_Δp * Δp2 / Le2 + q_z2 .* (D_x * bc_Δp * Δp2 / Le2) + 
@@ -224,5 +226,5 @@ tspan = (0.,90.)
 N = 50 # number of collocation points
 
 sol = coupled_oscillators(;N, tspan, model_params)
-plot_PT(model_params, N, sol, "plots")
+plot_T_center(model_params, N, sol, "plots")
 
