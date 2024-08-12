@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/829978708.svg)](https://zenodo.org/doi/10.5281/zenodo.13300509)
+
 This repository contains the code for the paper 
 > *Chaotic Slow Slip Events in New Zealand from two coupled slip patches: a proof of concept*, Poulet, T., Truttmann, S., Boussange, V., Veveakis, M., (2024).
 
